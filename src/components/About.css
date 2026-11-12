@@ -1,103 +1,77 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap");
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: "Poppins", sans-serif;
-}
-
 .Detail {
-  background: linear-gradient(135deg, #691878, #121212, #121212, #691878);
-  min-height: 100vh;
-  padding: 80px 20px;
-  color: #fff;
-  text-align: center;
   position: relative;
+  padding: clamp(4rem, 8vw, 7rem) 1.25rem;
+  background: #f8f8f8;
+  color: #151515;
+  text-align: center;
+}
+
+.Detail > .container {
+  position: relative;
+  z-index: 1;
 }
 
 .Detail h2 {
-  font-size: 2.8rem;
+  margin-bottom: 1rem;
+  color: #151515;
+  font-size: clamp(2rem, 4.5vw, 3.4rem);
   font-weight: 700;
-  margin-bottom: 25px;
-  color: #fff;
 }
 
-.Detail p {
-  font-size: 1rem;
-  color: #ddd;
-  line-height: 1.7;
-  margin-bottom: 40px;
+.Detail > .container > .row > .col > p {
+  max-width: 760px;
+  margin: 0 auto 3rem;
+  color: #555;
+  font-size: 1.05rem;
+  line-height: 1.75;
 }
 
 .Detail-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 25px;
-  max-width: 1100px;
-  margin: auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  max-width: 1120px;
+  margin: 0 auto;
+  text-align: left;
 }
 
 .Detail-item {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.Detail-item:hover {
-  transform: translateY(-8px);
+  min-width: 0;
 }
 
 .Detail-event {
-  background: linear-gradient(
-    135deg,
-    rgba(170, 54, 124, 0.85),
-    rgba(74, 47, 189, 0.85)
-  );
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  text-align: left;
   height: 100%;
+  padding: clamp(1.5rem, 3vw, 2rem);
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 12px 35px rgba(21, 21, 21, 0.05);
 }
 
 .Detail-event h3 {
-  font-size: 1.6rem;
-  margin-bottom: 15px;
-  font-weight: 600;
-  color: #fff;
-  border-left: 4px solid #ff70c2;
-  padding-left: 10px;
+  margin-bottom: 0.75rem;
+  padding: 0;
+  border: 0;
+  color: #e63946;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .Detail-event p {
+  margin: 0;
+  color: #555;
   font-size: 0.95rem;
-  color: #eaeaea;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
-/* Background image on right */
-.background-image-right {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 350px;
-  opacity: 0.15;
+.Detail .background-image-right {
   z-index: 0;
+  opacity: 0.05;
 }
 
-/* Responsive */
-@media (max-width: 767px) {
-  .Detail {
-    padding: 60px 15px;
-  }
-
-  .Detail h2 {
-    font-size: 2rem;
-  }
-
-  .background-image-right {
-    display: none;
+@media (max-width: 800px) {
+  .Detail-container {
+    grid-template-columns: 1fr;
+    max-width: 620px;
   }
 }

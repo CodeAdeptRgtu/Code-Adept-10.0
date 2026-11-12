@@ -75,7 +75,7 @@ export const NavBar = () => {
               }
               onClick={() => onUpdateActiveLink("CodeAdept")}
             >
-              CodeAdept 9.0
+              CodeAdept 10.0
             </Nav.Link>
 
             <Nav.Link

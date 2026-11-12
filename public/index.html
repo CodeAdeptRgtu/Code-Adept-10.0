@@ -7,9 +7,9 @@
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="Web site created using create-react-app"
+      content="DoIT Coding Club at UIT RGPV: coding events, learning resources, and student community."
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/DoIT.png" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
     <!--
       manifest.json provides metadata used when your web app is installed on a
       user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
@@ -25,19 +25,7 @@
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
     <title>DOIT - Coding Club</title>
-    <script src="https://www.google.com/recaptcha/api.js?render=6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT"></script>
-    <script>
-      function onClick(e) {
-          e.preventDefault();
-          grecaptcha.ready(function() {
-              grecaptcha.execute('6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT', {action: 'submit'}).then(function(token) {
-                  // You will need to handle token submission to your server here
-                  // For example, you can set it in local storage, a global variable, etc.
-                  localStorage.setItem('recaptchaToken', token);
-              });
-          });
-      }
-  </script>
+    <script async defer src="https://www.google.com/recaptcha/api.js?render=6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -52,6 +40,5 @@
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
-    <script src="path/to/your/bundle.js"></script>
   </body>
 </html>

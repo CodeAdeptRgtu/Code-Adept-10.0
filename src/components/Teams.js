@@ -114,7 +114,7 @@ export const Teams = () => {
                   }
                 >
                   <h2>Teams</h2>
-                  <p>Meet the talented team Members of Codeadept 9.0</p>
+                  <p>Meet the team behind the DoIT Coding Club</p>
                   <Row>
                     {teams.map((team, index) => {
                       return <ProjectCard key={index} {...team} />;

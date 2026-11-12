@@ -10,10 +10,19 @@ const Flag = () => {
         <img src={logo} alt="CodeAdept Logo" />
       </div>
 
-      <h1 className="event-title">CodeAdept 9.0</h1>
+      <h1 className="event-title">CodeAdept 10.0</h1>
+
+      <p className="event-organizer">
+        Department of Information Technology, UIT RGPV
+      </p>
+
+      <p className="event-facts">
+        Individual participation <span aria-hidden="true">·</span> Free entry
+        <span aria-hidden="true">·</span> UIT RGPV students
+      </p>
 
       <Link to="/register" className="register-btn">
-        Register Now
+        Registration information
       </Link>
     </header>
   );

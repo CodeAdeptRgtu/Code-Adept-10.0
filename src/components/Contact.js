@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container, Row, Col } from "react-bootstrap";
 import { db } from "./firebase"; // Firestore config
 import { collection, addDoc } from "firebase/firestore";
@@ -20,17 +20,6 @@ export const Contact = () => {
   const [formDetails, setFormDetails] = useState(formInitialDetails);
   const [buttonText, setButtonText] = useState("Send");
   const [status, setStatus] = useState({});
-  const [recaptchaToken, setRecaptchaToken] = useState("");
-
-  // Load reCAPTCHA script (same as Registration.js)
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src =
-      "https://www.google.com/recaptcha/api.js?render=6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT";
-    script.async = true;
-    document.body.appendChild(script);
-  }, []);
-
   const onFormUpdate = (category, value) => {
     setFormDetails({
       ...formDetails,
@@ -45,11 +34,18 @@ export const Contact = () => {
 
     try {
       // Execute reCAPTCHA v3
-      const token = await window.grecaptcha.execute(
-        "6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT",
-        { action: "submit" }
-      );
-      setRecaptchaToken(token);
+      if (!window.grecaptcha) {
+        throw new Error("reCAPTCHA is unavailable");
+      }
+      const token = await new Promise((resolve, reject) => {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha
+            .execute("6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT", {
+              action: "submit",
+            })
+            .then(resolve, reject);
+        });
+      });
 
       if (token) {
         // Add the form details to Firestore
@@ -109,6 +105,9 @@ export const Contact = () => {
                       <Col size={12} sm={6} className="px-1">
                         <input
                           type="text"
+                          aria-label="First Name"
+                          autoComplete="given-name"
+                          required
                           value={formDetails.firstName}
                           placeholder="First Name"
                           onChange={(e) =>
@@ -119,6 +118,9 @@ export const Contact = () => {
                       <Col size={12} sm={6} className="px-1">
                         <input
                           type="text"
+                          aria-label="Last Name"
+                          autoComplete="family-name"
+                          required
                           value={formDetails.lastName}
                           placeholder="Last Name"
                           onChange={(e) =>
@@ -129,6 +131,9 @@ export const Contact = () => {
                       <Col size={12} sm={6} className="px-1">
                         <input
                           type="email"
+                          aria-label="Email Address"
+                          autoComplete="email"
+                          required
                           value={formDetails.email}
                           placeholder="Email Address"
                           onChange={(e) =>
@@ -139,6 +144,8 @@ export const Contact = () => {
                       <Col size={12} sm={6} className="px-1">
                         <input
                           type="tel"
+                          aria-label="Phone Number"
+                          autoComplete="tel"
                           value={formDetails.phone}
                           placeholder="Phone No."
                           onChange={(e) =>
@@ -149,19 +156,23 @@ export const Contact = () => {
                       <Col size={12} className="px-1">
                         <textarea
                           rows="6"
+                          aria-label="Message"
+                          required
                           value={formDetails.message}
                           placeholder="Message"
                           onChange={(e) =>
                             onFormUpdate("message", e.target.value)
                           }
                         ></textarea>
-                        <button type="submit">
+                        <button type="submit" disabled={buttonText === "Sending..."}>
                           <span>{buttonText}</span>
                         </button>
                       </Col>
                       {status.message && (
                         <Col>
                           <p
+                            role="status"
+                            aria-live="polite"
                             className={
                               status.success === false ? "danger" : "success"
                             }

@@ -1,92 +1,79 @@
 .flag {
-  font-family: Mokoto, "Centra", sans-serif;
-  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url("../assets/img/codeAdept9.0_background.png") center/cover no-repeat;
-  height: 100vh; /* Full viewport height */
-  min-height: 500px; /* Ensure minimum height on very small screens */
+  min-height: max(620px, 92vh);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  gap: 2rem;
-  padding: 20px;
+  gap: clamp(1rem, 2.5vh, 1.75rem);
+  padding: 7rem 1.25rem 4rem;
+  background: radial-gradient(circle at 75% 35%, #3a1a1d 0, transparent 35%),
+    #151515;
   color: #fff;
+  text-align: center;
 }
 
-.content img {
-  height: 22vh;
-  max-height: 250px;
-  filter: drop-shadow(0 0 6px #ff6ec4);
-  transition: transform 0.4s ease, filter 0.4s ease;
+.flag .content img {
+  width: min(68vw, 340px);
+  height: auto;
+  filter: drop-shadow(0 12px 28px rgba(230, 57, 70, 0.2));
 }
 
-.content img:hover {
-  transform: scale(1.05) rotate(-3deg);
-  filter: drop-shadow(0 0 12px #ff6ec4);
+.flag .event-title {
+  margin: 0;
+  color: #fff;
+  font-size: clamp(3rem, 8vw, 6.5rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 1;
 }
 
-.event-title {
-  font-size: 8vh; /* Slightly bigger title */
-  font-weight: 900;
-  background: linear-gradient(90deg, #ff6ec4, #7873f5);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 6px #ff6ec4);
+.event-organizer,
+.event-facts {
+  max-width: 680px;
+  margin: 0;
+  color: #ddd;
+  font-size: clamp(1rem, 2vw, 1.25rem);
+  line-height: 1.6;
 }
 
-.register-btn {
+.event-facts {
+  color: #bdbdbd;
+  font-size: 0.95rem;
+}
+
+.event-facts span {
+  color: #e63946;
+  margin: 0 0.45rem;
+}
+
+.flag .register-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 14px 32px;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 25px;
-  background: linear-gradient(90deg, #ff6ec4, #7873f5);
+  min-height: 52px;
+  padding: 0.8rem 1.4rem;
+  border: 1px solid #e63946;
+  border-radius: 8px;
+  background: #e63946;
   color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
   text-decoration: none;
-  transition: 0.3s ease;
+  transition: background-color 160ms ease, transform 160ms ease;
 }
 
-.register-btn:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 25px rgba(138, 43, 226, 0.6);
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .flag {
-    height: 100vh;
-    padding: 15px;
-  }
-  .event-title {
-    font-size: 6.5vh;
-  }
-  .register-btn {
-    font-size: 16px;
-    padding: 12px 26px;
-  }
-  .content img {
-    height: 16vh;
-    max-height: 200px;
-  }
+.flag .register-btn:hover {
+  background: #c92d39;
+  color: #fff;
+  transform: translateY(-2px);
 }
 
 @media (max-width: 480px) {
   .flag {
-    height: 100vh;
-    padding: 10px;
+    min-height: 100svh;
   }
-  .event-title {
-    font-size: 5.5vh;
-  }
-  .register-btn {
-    font-size: 14px;
-    padding: 10px 22px;
-  }
-  .content img {
-    height: 14vh;
-    max-height: 120px;
+
+  .event-facts span {
+    margin: 0 0.2rem;
   }
 }

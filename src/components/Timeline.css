@@ -1,61 +1,45 @@
-/* General timeline section */
 .timeline-section {
-  padding: 80px 2vw;
-  background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
-  font-family: Mokoto, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 80px;
   position: relative;
   overflow: hidden;
+  padding: clamp(4rem, 8vw, 7rem) 1.25rem;
+  background: #151515;
+  color: #fff;
 }
 
 .timeline-title {
-  font-size: 2.8rem;
-  font-weight: 800;
+  margin: 0 0 3rem;
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
   text-align: center;
-  background: linear-gradient(90deg, #ff6ec4, #7873f5);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 50px;
-  position: relative;
-  z-index: 1;
 }
 
-/* Timeline cards wrapper */
 .timeline-cards {
+  position: relative;
   display: flex;
   flex-direction: column;
-  position: relative;
-  max-width: 1000px;
-  width: 100%;
-  gap: 80px;
+  gap: 2rem;
+  width: min(100%, 980px);
   margin: 0 auto;
 }
 
-/* Vertical line on desktop */
 .timeline-cards::before {
-  content: "";
   position: absolute;
   top: 0;
+  bottom: 0;
   left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(to bottom, #ff6ec4, #7873f5);
-  border-radius: 2px;
-  z-index: 0;
+  width: 2px;
+  background: #e63946;
+  content: "";
 }
 
-/* Timeline card wrapper */
 .timeline-card-wrapper {
+  position: relative;
   display: flex;
   width: 100%;
-  position: relative;
   opacity: 0;
-  transform: translateY(50px);
-  transition: all 0.8s ease-out;
+  transform: translateY(20px);
+  transition: opacity 350ms ease, transform 350ms ease;
 }
 
 .timeline-card-wrapper.show {
@@ -63,155 +47,99 @@
   transform: translateY(0);
 }
 
-/* Card design */
 .timeline-card {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 25px;
-  padding: 35px 40px;
-  width: 45%;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 46%;
+  padding: 1.5rem;
+  border: 1px solid #383838;
+  border-radius: 12px;
+  background: #202020;
 }
 
-.timeline-card:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 12px 25px rgba(255, 110, 196, 0.2);
+.timeline-card-wrapper.odd {
+  justify-content: flex-start;
 }
 
-/* Timeline indicator dot */
+.timeline-card-wrapper.even {
+  justify-content: flex-end;
+}
+
 .timeline-card::after {
-  content: "";
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 16px;
-  height: 16px;
-  background: linear-gradient(45deg, #ff6ec4, #7873f5);
+  top: 1.8rem;
+  width: 12px;
+  height: 12px;
+  border: 3px solid #151515;
   border-radius: 50%;
-  box-shadow: 0 0 4px rgba(255, 110, 196, 0.3);
-  z-index: 2;
+  background: #e63946;
+  content: "";
 }
 
-@media (min-width: 1025px) {
-  .timeline-card-wrapper.odd {
-    justify-content: flex-start;
+.timeline-card-wrapper.odd .timeline-card::after {
+  right: calc(-8.7% - 7px);
+}
+
+.timeline-card-wrapper.even .timeline-card::after {
+  left: calc(-8.7% - 7px);
+}
+
+.timeline-date {
+  margin-bottom: 0.5rem;
+  color: #ff737c;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.timeline-card-title {
+  margin-bottom: 0.75rem;
+  color: #fff;
+  font-size: clamp(1.15rem, 2vw, 1.4rem);
+  font-weight: 700;
+}
+
+.timeline-card-text {
+  margin-top: 0.25rem;
+  color: #ccc;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.timeline-section > .background-image-right {
+  position: absolute;
+  top: 10%;
+  right: 0;
+  z-index: 0;
+  width: min(22vw, 260px);
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+@media (max-width: 800px) {
+  .timeline-cards::before {
+    left: 10px;
   }
 
+  .timeline-card-wrapper,
+  .timeline-card-wrapper.odd,
   .timeline-card-wrapper.even {
     justify-content: flex-end;
   }
 
-  .timeline-card-wrapper.odd .timeline-card::after {
-    right: -8px;
+  .timeline-card {
+    width: calc(100% - 2rem);
   }
 
+  .timeline-card-wrapper.odd .timeline-card::after,
   .timeline-card-wrapper.even .timeline-card::after {
-    left: -8px;
+    right: auto;
+    left: -1.9rem;
   }
 }
 
-/* Card text */
-.timeline-date {
-  font-size: 1.3rem;
-  font-weight: 700;
-  margin-bottom: 12px;
-  color: #ff6ec4;
-  text-shadow: 0 0 1.5px #ff6ec4;
-}
-
-.timeline-card-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  margin-bottom: 15px;
-  background: linear-gradient(90deg, #ff6ec4, #7873f5);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.timeline-card-text {
-  font-size: 0.85rem;
-  line-height: 1.8;
-  color: #ccc;
-  margin: 6px 0;
-}
-
-/* ---------------- MOBILE IMPROVEMENTS ---------------- */
-
-/* Tablet / small screens */
-@media (max-width: 1024px) {
-  .timeline-card-wrapper,
-  .timeline-card-wrapper.odd,
-  .timeline-card-wrapper.even {
-    justify-content: flex-start !important;
-  }
-
-  .timeline-card {
-    width: 90%;
-    padding: 25px 20px;
-    border-radius: 20px;
-  }
-
-  .timeline-cards::before {
-    left: 20px; /* Vertical accent line on left */
-    height: auto;
-    width: 3px;
-    background: linear-gradient(to bottom, #ff6ec4, #7873f5);
-  }
-
-  .timeline-card::after {
-    display: block;
-    left: -11px; /* Dot aligned with vertical line */
-    top: 30px;
-  }
-}
-
-/* Mobile phones */
-@media (max-width: 480px) {
-  .timeline-card {
-    width: 100%;
-    padding: 20px 16px;
-    border-radius: 15px;
-  }
-
-  .timeline-title {
-    font-size: 1.8rem;
-    margin-bottom: 30px;
-  }
-
-  .timeline-card-title {
-    font-size: 1.4rem;
-  }
-
-  .timeline-date {
-    font-size: 1.1rem;
-  }
-
-  .timeline-card-text {
-    font-size: 0.8rem;
-    line-height: 1.6;
-  }
-
-  /* Add some spacing between cards */
+@media (prefers-reduced-motion: reduce) {
   .timeline-card-wrapper {
-    margin-bottom: 30px;
-  }
-
-  /* Dot and line styling for mobile */
-  .timeline-cards::before {
-    display: block;
-    left: 15px;
-    width: 3px;
-    height: 100%;
-    background: linear-gradient(to bottom, #ff6ec4, #7873f5);
-  }
-
-  .timeline-card::after {
-    left: -9px;
-    top: 20px;
-    width: 12px;
-    height: 12px;
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

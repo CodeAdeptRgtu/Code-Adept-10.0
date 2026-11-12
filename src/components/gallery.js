@@ -157,7 +157,7 @@ const Gallery = () => {
 
       {/* Tagline */}
       <div className="line">
-        <p>Prepare to Code, Compete, and Conquer at CodeAdept 9.0!</p>
+        <p>Prepare to Code, Compete, and Conquer at CodeAdept 10.0!</p>
       </div>
 
       {/* Register Button - Text Only */}

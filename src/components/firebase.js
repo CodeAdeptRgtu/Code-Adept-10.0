@@ -12,6 +12,10 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
+export const isFirebaseConfigured = Object.values(firebaseConfig).every(
+  (value) => typeof value === "string" && value.trim().length > 0
+);
+
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);

@@ -1,101 +1,80 @@
 .info-section {
-  padding: 80px 2vw;
-  background-color: #121212;
-  font-family: Mokoto, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 60px;
+  padding: clamp(4rem, 8vw, 7rem) 1.25rem;
+  background: #f8f8f8;
+  color: #151515;
 }
 
-.card {
-  background: #1e1e1e;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 25px;
-  padding: 40px 30px;
-  max-width: 800px;
-  width: 100%;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.competition-heading {
+  max-width: 720px;
+  margin: 0 auto 3rem;
+  text-align: center;
 }
 
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+.competition-kicker {
+  color: #e63946;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  margin-bottom: 0.75rem;
 }
 
-.card-title {
-  font-size: 1.8rem;
+.competition-heading h2 {
+  color: #151515;
+  font-size: clamp(2rem, 5vw, 3.5rem);
   font-weight: 700;
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, #aa367c, #4a2fbd);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-align: center;
 }
 
-.card-text {
-  font-size: 0.85rem;
-  line-height: 1.8;
-  color: #ccc;
-  text-align: center;
-}
-
-.info-cards {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
-  flex-wrap: wrap;
-}
-
-.info-cards .card {
-  flex: 1 1 45%;
-}
-
-.overview-card {
-  max-width: 900px;
+.competition-heading > p:last-child {
+  color: #555;
+  font-size: 1.05rem;
+  line-height: 1.7;
 }
 
 .rounds {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+  max-width: 1180px;
+  margin: 0 auto;
 }
 
-.round-card {
-  background: #1e1e1e;
-  border-left: 5px solid #aa367c;
-  padding: 30px 25px;
+.info-section .round-card {
+  min-width: 0;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-top: 4px solid #e63946;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(21, 21, 21, 0.06);
 }
 
-.round-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #fff;
+.round-number {
+  color: #e63946;
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin-bottom: 1.25rem;
 }
 
-@media (max-width: 1024px) {
-  .info-cards {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .info-cards .card {
-    flex: 1 1 100%;
-  }
+.info-section .round-title {
+  color: #151515;
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  line-height: 1.25;
+  margin-bottom: 1.5rem;
 }
 
-@media (max-width: 480px) {
-  .card-title {
-    font-size: 1.5rem;
-  }
+.round-detail {
+  color: #555;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-top: 0.35rem;
+}
 
-  .round-title {
-    font-size: 1.2rem;
-  }
-
-  .card-text {
-    font-size: 0.9rem;
+@media (max-width: 800px) {
+  .rounds {
+    grid-template-columns: 1fr;
+    max-width: 560px;
   }
 }

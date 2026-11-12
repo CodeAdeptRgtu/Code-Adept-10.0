@@ -1,394 +1,267 @@
-import React, { useState, useEffect } from "react";
-import { db } from "./firebase";
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useEffect, useRef, useState } from "react";
+import {
+  collection,
+  doc,
+  runTransaction,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db, isFirebaseConfigured } from "./firebase";
 import "./Registration.css";
 
+const REGISTRATION_OPENS = "2026-11-13";
+const EMPTY_FORM = {
+  fullName: "",
+  collegeRollNumber: "",
+  enrollmentNumber: "",
+  emailAddress: "",
+  mobileNumber: "",
+  branchDepartment: "",
+  currentSemester: "",
+};
+
+const todayInIndia = () =>
+  new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+
+const hashEnrollmentNumber = async (enrollmentNumber) => {
+  if (!window.crypto?.subtle) {
+    throw new Error("A secure browser connection is required to register.");
+  }
+
+  const bytes = new TextEncoder().encode(enrollmentNumber);
+  const digest = await window.crypto.subtle.digest("SHA-256", bytes);
+  const hexDigest = Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0")
+  ).join("");
+
+  return `ca10_${hexDigest}`;
+};
+
 function Registration() {
-  // const [formData, setFormData] = useState({
-  //   fullName: "",
-  //   emailId: "",
-  //   number: "",
-  //   graduation: "",
-  //   college: "",
-  //   otherCollege: "",
-  //   branch: "",
-  //   skills: [],
-  //   otherSkill: "",
-  //   studentId: "",
-  //   prefferedlanguages: "",
-  // });
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [registrationOpen, setRegistrationOpen] = useState(
+    () => todayInIndia() >= REGISTRATION_OPENS
+  );
+  const submissionLock = useRef(false);
 
-  // const [error, setError] = useState("");
-  // const [recaptchaToken, setRecaptchaToken] = useState("");
-  // const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setRegistrationOpen(todayInIndia() >= REGISTRATION_OPENS);
+    }, 60_000);
 
-  // const availableSkills = [
-  //   "DSA/CP",
-  //   "CYBERSECURITY",
-  //   "WEB DEVELOPMENT",
-  //   "APP DEVELOPMENT",
-  //   "BLOCKCHAIN",
-  //   "AI/ML",
-  //   "DATA SCIENCE",
-  //   "Other",
-  // ];
+    return () => window.clearInterval(timer);
+  }, []);
 
-  // const graduationYears = ["2026", "2027", "2028", "2029"];
-  // const preferredLanguages = [
-  //   "Python",
-  //   "Java",
-  //   "JavaScript",
-  //   "C++",
-  //   "C",
-  //   "Other",
-  // ];
-  // const colleges = ["UIT RGPV", "SOIT RGPV", "Other"];
-  // const branches = [
-  //   { short: "CSE", full: "Computer Science and Engineering" },
-  //   { short: "IT", full: "Information Technology" },
-  //   { short: "EXE", full: "Electrical Engineering" },
-  //   { short: "ECE", full: "Electronics and Communication Engineering" },
-  //   { short: "ME", full: "Mechanical Engineering" },
-  //   { short: "CE", full: "Civil Engineering" },
-  //   { short: "AU", full: "Automobile Engineering" },
-  //   { short: "PCT", full: "Petrochemical Technology" },
-  //   { short: "CS(AI/ML)", full: "Computer Science (AI/ML)" },
-  //   { short: "CS(DS)", full: "Computer Science (Data Science)" },
-  //   { short: "CSBS", full: "Computer Science and Business Systems" },
-  // ];
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((previous) => ({ ...previous, [name]: value }));
+    setError("");
+    setSuccess("");
+  };
 
-  // useEffect(() => {
-  //   const script = document.createElement("script");
-  //   script.src =
-  //     "https://www.google.com/recaptcha/api.js?render=6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT";
-  //   script.async = true;
-  //   document.body.appendChild(script);
-  // }, []);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (submissionLock.current) return;
 
-  // const handleChange = (e) => {
-  //   const { name, value } = e.target;
-  //   setFormData({ ...formData, [name]: value });
-  // };
+    if (!registrationOpen && todayInIndia() < REGISTRATION_OPENS) {
+      setError("Registration opens on 13 November 2026.");
+      return;
+    }
 
-  // const validateForm = () => {
-  //   for (const key in formData) {
-  //     if (
-  //       (formData[key] === "" || formData[key].length === 0) &&
-  //       key !== "otherSkill" &&
-  //       key !== "otherCollege" &&
-  //       key !== "skills" &&
-  //       key !== "prefferedlanguages"
-  //     ) {
-  //       toast.error(
-  //         `${key
-  //           .replace(/([A-Z])/g, " $1")
-  //           .replace(/^./, (str) => str.toUpperCase())} is required.`
-  //       );
-  //       return false;
-  //     }
-  //   }
+    if (!isFirebaseConfigured) {
+      setError(
+        "Registration is unavailable because Firebase is not configured for this deployment."
+      );
+      return;
+    }
 
-  //   if (formData.college === "Other" && formData.otherCollege.trim() === "") {
-  //     toast.error("Please enter your college name.");
-  //     return false;
-  //   }
+    const cleaned = Object.fromEntries(
+      Object.entries(formData).map(([key, value]) => [key, value.trim()])
+    );
 
-  //   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  //   if (!emailRegex.test(formData.emailId.trim())) {
-  //     toast.error("Invalid email address");
-  //     return false;
-  //   }
+    const missingField = Object.entries(cleaned).find(([, value]) => !value);
+    if (missingField) {
+      setError("Please complete all required fields.");
+      return;
+    }
 
-  //   const phoneRegex = /^[0-9]{10}$/;
-  //   if (!phoneRegex.test(formData.number.trim())) {
-  //     toast.error("Phone number must be 10 digits.");
-  //     return false;
-  //   }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.emailAddress)) {
+      setError("Enter a valid email address.");
+      return;
+    }
 
-  //   return true;
-  // };
+    if (!/^\d+$/.test(cleaned.currentSemester)) {
+      setError("Enter your current semester as a whole number.");
+      return;
+    }
 
-  // const checkUniqueFields = async () => {
-  //   const normalizedEmail = formData.emailId.trim().toLowerCase();
-  //   const { number } = formData;
+    submissionLock.current = true;
+    setIsSubmitting(true);
+    setError("");
+    setSuccess("");
 
-  //   const emailQuery = query(
-  //     collection(db, "registrations"),
-  //     where("emailId", "==", normalizedEmail)
-  //   );
-  //   const numberQuery = query(
-  //     collection(db, "registrations"),
-  //     where("number", "==", number)
-  //   );
+    try {
+      const normalizedEnrollment = cleaned.enrollmentNumber.toUpperCase();
+      const registrationId = await hashEnrollmentNumber(normalizedEnrollment);
+      const registrationKeyRef = doc(db, "registrationKeys", registrationId);
+      const registrationRef = doc(collection(db, "registrations"));
 
-  //   try {
-  //     const [emailSnapshot, numberSnapshot] = await Promise.all([
-  //       getDocs(emailQuery),
-  //       getDocs(numberQuery),
-  //     ]);
-  //     if (!emailSnapshot.empty) {
-  //       toast.error("Email already registered");
-  //       return false;
-  //     }
-  //     if (!numberSnapshot.empty) {
-  //       toast.error("Phone number already registered");
-  //       return false;
-  //     }
-  //   } catch (error) {
-  //     console.error("Error checking unique fields: ", error);
-  //     toast.error("An error occurred while checking for uniqueness.");
-  //     return false;
-  //   }
-  //   return true;
-  // };
+      await runTransaction(db, async (transaction) => {
+        const existingRegistration = await transaction.get(registrationKeyRef);
 
-  // const handleRegister = async (e) => {
-  //   e.preventDefault();
-  //   setError("");
+        if (existingRegistration.exists()) {
+          const duplicateError = new Error("This enrollment number is registered already.");
+          duplicateError.code = "registration/already-exists";
+          throw duplicateError;
+        }
 
-  //   if (loading) return;
-  //   if (!validateForm()) return;
+        transaction.set(registrationKeyRef, {
+          event: "CodeAdept 10.0",
+          registeredAt: serverTimestamp(),
+        });
+        transaction.set(registrationRef, {
+          ...cleaned,
+          enrollmentNumber: normalizedEnrollment,
+          emailAddress: cleaned.emailAddress.toLowerCase(),
+          currentSemester: Number(cleaned.currentSemester),
+          event: "CodeAdept 10.0",
+          registrationFee: "FREE",
+          participation: "Individual",
+          registeredAt: serverTimestamp(),
+        });
+      });
 
-  //   setLoading(true);
-  //   try {
-  //     const token = await window.grecaptcha.execute(
-  //       "6LcpSGUqAAAAAFfQKc6O-qAz9FkUCjcesz-9qPQT",
-  //       { action: "submit" }
-  //     );
-  //     setRecaptchaToken(token);
+      setFormData(EMPTY_FORM);
+      setSuccess("Registration confirmed. Your details were saved successfully.");
+    } catch (submissionError) {
+      if (submissionError.code === "registration/already-exists") {
+        setError("This enrollment number is already registered.");
+      } else if (submissionError.code === "permission-denied") {
+        setError(
+          "Firebase denied this registration. Please contact the event organisers."
+        );
+      } else if (submissionError.code === "unavailable") {
+        setError("Registration could not reach Firebase. Check your connection and try again.");
+      } else {
+        setError(
+          "We could not confirm your registration. Please try again or contact the event organisers."
+        );
+      }
+    } finally {
+      submissionLock.current = false;
+      setIsSubmitting(false);
+    }
+  };
 
-  //     const isUnique = await checkUniqueFields();
-  //     if (!isUnique) {
-  //       setLoading(false);
-  //       return;
-  //     }
-
-  //     const normalizedEmail = formData.emailId.trim().toLowerCase();
-  //     const skillsString = [
-  //       ...formData.skills.filter((s) => s !== "Other"),
-  //       ...(formData.skills.includes("Other") && formData.otherSkill
-  //         ? [formData.otherSkill]
-  //         : []),
-  //     ].join(", ");
-
-  //     const finalCollege =
-  //       formData.college === "Other" && formData.otherCollege
-  //         ? formData.otherCollege
-  //         : formData.college;
-
-  //     const docRef = await addDoc(collection(db, "registrations"), {
-  //       ...formData,
-  //       emailId: normalizedEmail,
-  //       college: finalCollege,
-  //       skills: skillsString || "None",
-  //       prefferedlanguages: formData.prefferedlanguages || "None",
-  //       recaptchaToken: token,
-  //     });
-
-  //     console.log("Document written with ID: ", docRef.id);
-  //     toast.success("Registration Successful");
-
-  //     setFormData({
-  //       fullName: "",
-  //       emailId: "",
-  //       number: "",
-  //       graduation: "",
-  //       college: "",
-  //       otherCollege: "",
-  //       branch: "",
-  //       skills: [],
-  //       otherSkill: "",
-  //       studentId: "",
-  //       prefferedlanguages: "",
-  //     });
-  //   } catch (error) {
-  //     console.error("Error adding document: ", error);
-  //     toast.error("An error occurred during registration.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // const displayLabels = {
-  //   fullName: "Full Name",
-  //   emailId: "Email Address",
-  //   number: "Phone Number",
-  //   graduation: "Graduation Year",
-  //   college: "College Name",
-  //   branch: "Branch of Study",
-  //   skills: "Skills (optional)",
-  //   studentId: "Student ID (Enrollment No.)",
-  //   prefferedlanguages: "Preferred Language (optional)",
-  // };
+  const fields = [
+    { name: "fullName", label: "Full Name", autoComplete: "name" },
+    { name: "collegeRollNumber", label: "College Roll Number" },
+    { name: "enrollmentNumber", label: "Enrollment Number" },
+    {
+      name: "emailAddress",
+      label: "Email Address",
+      type: "email",
+      autoComplete: "email",
+    },
+    {
+      name: "mobileNumber",
+      label: "Mobile Number",
+      type: "tel",
+      autoComplete: "tel",
+    },
+    { name: "branchDepartment", label: "Branch / Department" },
+    {
+      name: "currentSemester",
+      label: "Current Semester",
+      type: "number",
+      min: "1",
+      step: "1",
+    },
+  ];
 
   return (
-    <div className="registration-form">
-      <h3 className="registration-form__title">CodeAdept 9.0 Registration</h3>
-
-      <div className="registration-closed">
-        <h2>🚫 Registrations Closed</h2>
-        <p>
-          Thank you for your interest! Registrations for{" "}
-          <strong>CodeAdept 9.0</strong> are now closed.
+    <main className="registration-page">
+      <section className="registration-panel" aria-labelledby="registration-title">
+        <p className="registration-kicker">CODEADEPT 10.0</p>
+        <h1 id="registration-title">Register for the competition</h1>
+        <p className="registration-intro">
+          Individual participation · Free entry · Open to UIT RGPV students
         </p>
-        <p>
-          Updates regarding the upcoming rounds will be shared with all
-          registered participants via email.
-        </p>
-      </div>
 
-      {/*<form onSubmit={handleRegister} className="registration-form">
-      <h3 className="registration-form__title">CodeAdept 9.0 Registration</h3>
+        <div className="registration-opening">
+          <strong>
+            {registrationOpen
+              ? "Registration is open"
+              : "Registration opens 13 November 2026"}
+          </strong>
+          <span>Organised by the Department of Information Technology, UIT RGPV</span>
+        </div>
 
-      {Object.keys(formData).map(
-        (key) =>
-          key !== "otherSkill" &&
-          key !== "otherCollege" && (
-            <div className="registration-form__field" key={key}>
-              <label htmlFor={key}>{displayLabels[key]}</label>
+        {!isFirebaseConfigured && (
+          <p className="registration-alert" role="alert">
+            Firebase is not configured for this deployment. Registration cannot
+            be submitted until the existing Firebase environment is provided.
+          </p>
+        )}
 
-              {key === "graduation" ? (
-                <select
-                  id={key}
-                  className="registration-form__input"
-                  name={key}
-                  value={formData[key]}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Graduation Year</option>
-                  {graduationYears.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              ) : key === "prefferedlanguages" ? (
-                <select
-                  id={key}
-                  className="registration-form__input"
-                  name={key}
-                  value={formData[key]}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Preferred Language (optional)</option>
-                  {preferredLanguages.map((lang) => (
-                    <option key={lang} value={lang}>
-                      {lang}
-                    </option>
-                  ))}
-                </select>
-              ) : key === "college" ? (
-                <>
-                  <select
-                    id={key}
-                    className="registration-form__input"
-                    name={key}
-                    value={formData[key]}
-                    onChange={handleChange}
-                  >
-                    <option value="">Select College</option>
-                    {colleges.map((college) => (
-                      <option key={college} value={college}>
-                        {college}
-                      </option>
-                    ))}
-                  </select>
-                  {formData.college === "Other" && (
-                    <input
-                      type="text"
-                      className="registration-form__input mt-2"
-                      placeholder="Enter your college name"
-                      value={formData.otherCollege}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          otherCollege: e.target.value,
-                        }))
-                      }
-                    />
-                  )}
-                </>
-              ) : key === "branch" ? (
-                <select
-                  id={key}
-                  className="registration-form__input"
-                  name={key}
-                  value={formData[key]}
-                  onChange={handleChange}
-                >
-                  <option value="">Select Branch</option>
-                  {branches.map((branch) => (
-                    <option key={branch.short} value={branch.short}>
-                      {branch.full} ({branch.short})
-                    </option>
-                  ))}
-                </select>
-              ) : key === "skills" ? (
-                <div className="skills-container">
-                  {availableSkills.map((skill) => (
-                    <button
-                      key={skill}
-                      type="button"
-                      className={`skill-btn ${
-                        formData.skills.includes(skill) ? "selected" : ""
-                      }`}
-                      onClick={() =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          skills: prev.skills.includes(skill)
-                            ? prev.skills.filter((s) => s !== skill)
-                            : [...prev.skills, skill],
-                        }))
-                      }
-                    >
-                      {skill}
-                    </button>
-                  ))}
-                  {formData.skills.includes("Other") && (
-                    <input
-                      type="text"
-                      className="registration-form__input mt-2"
-                      placeholder="Enter your skill"
-                      value={formData.otherSkill}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          otherSkill: e.target.value,
-                        }))
-                      }
-                    />
-                  )}
-                </div>
-              ) : (
-                <input
-                  id={key}
-                  className="registration-form__input"
-                  name={key}
-                  placeholder={displayLabels[key]}
-                  value={formData[key]}
-                  onChange={handleChange}
-                />
-              )}
+        <form className="registration-fields" onSubmit={handleSubmit}>
+          {fields.map((field) => (
+            <div className="registration-field" key={field.name}>
+              <label htmlFor={field.name}>{field.label}</label>
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type || "text"}
+                autoComplete={field.autoComplete || "off"}
+                min={field.min}
+                step={field.step}
+                value={formData[field.name]}
+                onChange={handleChange}
+                required
+              />
             </div>
-          )
-      )}
+          ))}
 
-      {error && <p className="error-message">{error}</p>}
+          {error && (
+            <p className="registration-message registration-error" role="alert">
+              {error}
+            </p>
+          )}
+          {success && (
+            <p className="registration-message registration-success" role="status">
+              {success}
+            </p>
+          )}
 
-      <div className="registration-form__submit">
-        <button
-          type="submit"
-          className="registration-form__button"
-          disabled={loading}
-        >
-          {loading ? "Registering..." : "Register"}
-        </button>
-        <ToastContainer />
-      </div>
-    </form>*/}
-    </div>
+          {!registrationOpen && (
+            <p className="registration-note" role="status">
+              The form will be available from 13 November 2026.
+            </p>
+          )}
+
+          <button
+            className="registration-submit"
+            type="submit"
+            disabled={!registrationOpen || !isFirebaseConfigured || isSubmitting}
+          >
+            {isSubmitting
+              ? "Submitting registration…"
+              : !isFirebaseConfigured
+                ? "Registration unavailable"
+                : registrationOpen
+                  ? "Submit registration"
+                  : "Opens 13 November 2026"}
+          </button>
+        </form>
+      </section>
+    </main>
   );
 }
 

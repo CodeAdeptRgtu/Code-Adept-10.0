@@ -5,13 +5,20 @@ export const ProjectCard = ({ title, description, imgUrl, linkedin }) => {
   return (
     <Col size={12} xs={6} sm={3} md={3}>
       <div className="proj-imgbx">
-        <img src={imgUrl} alt="team member" />
+        <img src={imgUrl} alt={title} />
         <div className="proj-txtx">
           <h4>{title}</h4>
           <div className="italic">{description}</div>
-          <a href={linkedin ? linkedin : "#"}target="_blank" rel="noreferrer">
-            <FaLinkedin size={20} />
-          </a>
+          {linkedin && (
+            <a
+              href={linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${title} on LinkedIn`}
+            >
+              <FaLinkedin size={20} aria-hidden="true" />
+            </a>
+          )}
         </div>
       </div>
     </Col>

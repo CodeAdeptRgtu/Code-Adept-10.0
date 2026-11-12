@@ -20,7 +20,7 @@ export const Footer = () => {
             className="footer-contact text-center text-md-start"
           >
             <p>
-              Mobile: <a href="tel:+919691497996">+91 9981922559, 7389684784</a>
+              Mobile: <a href="tel:+919981922559">+91 9981922559, 7389684784</a>
             </p>
             <p>
               Email:{" "}
