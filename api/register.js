@@ -1,5 +1,6 @@
 const { createHash } = require("crypto");
-const admin = require("firebase-admin");
+const { cert, getApps, initializeApp } = require("firebase-admin/app");
+const { FieldValue, getFirestore: getAdminFirestore } = require("firebase-admin/firestore");
 
 const REGISTRATION_OPENS = "2026-11-13";
 const EVENT_NAME = "CodeAdept 10.0";
@@ -9,7 +10,7 @@ function getFirestore() {
     throw new Error("Firebase Admin is not configured.");
   }
 
-  if (admin.apps.length === 0) {
+  if (getApps().length === 0) {
     let serviceAccount;
     try {
       serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
@@ -27,10 +28,10 @@ function getFirestore() {
     }
 
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
+    initializeApp({ credential: cert(serviceAccount) });
   }
 
-  return admin.firestore();
+  return getAdminFirestore();
 }
 
 function todayInIndia() {
@@ -132,14 +133,14 @@ module.exports = async function register(req, res) {
 
       transaction.create(registrationKeyRef, {
         event: EVENT_NAME,
-        registeredAt: admin.firestore.FieldValue.serverTimestamp(),
+        registeredAt: FieldValue.serverTimestamp(),
       });
       transaction.create(registrationRef, {
         ...values,
         event: EVENT_NAME,
         registrationFee: "FREE",
         participation: "Individual",
-        registeredAt: admin.firestore.FieldValue.serverTimestamp(),
+        registeredAt: FieldValue.serverTimestamp(),
       });
     });
 
