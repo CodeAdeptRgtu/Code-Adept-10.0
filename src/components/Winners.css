@@ -1,0 +1,157 @@
+.winners-section {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(4.5rem, 9vw, 7rem) 1.25rem;
+  background:
+    radial-gradient(circle at 50% 0, rgba(230, 57, 70, 0.08), transparent 34%),
+    #f3f3f3;
+  color: #151515;
+}
+
+.winners-container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.winners-heading {
+  margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  text-align: center;
+}
+
+.winners-eyebrow {
+  margin-bottom: 0.8rem;
+  color: #e63946;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.winners-heading h2 {
+  color: #151515;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+}
+
+.winners-subtitle {
+  margin-top: 0.75rem;
+  color: #666;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+}
+
+.winners-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 2rem);
+}
+
+.winner-card {
+  overflow: hidden;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 16px 38px rgba(21, 21, 21, 0.08);
+  transition: transform 220ms ease, box-shadow 220ms ease,
+    border-color 220ms ease;
+}
+
+.winner-card:hover {
+  transform: translateY(-7px);
+  border-color: rgba(230, 57, 70, 0.4);
+  box-shadow: 0 24px 48px rgba(21, 21, 21, 0.14);
+}
+
+.winner-card-first {
+  border: 2px solid #e63946;
+  box-shadow: 0 22px 50px rgba(230, 57, 70, 0.16);
+}
+
+.winner-image-frame {
+  display: grid;
+  aspect-ratio: 4 / 3;
+  place-items: center;
+  overflow: hidden;
+  padding: 0.75rem;
+  background: #ededed;
+}
+
+.winner-card-first .winner-image-frame {
+  aspect-ratio: 4 / 3.2;
+  background: #f7eeee;
+}
+
+.winner-image-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.winner-details {
+  padding: 1.35rem 1.25rem 1.5rem;
+  text-align: center;
+}
+
+.winner-place {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  margin-bottom: 0.65rem;
+  color: #e63946;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.11em;
+}
+
+.winner-place span {
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
+
+.winner-details h3 {
+  color: #202020;
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  font-weight: 700;
+}
+
+@media (max-width: 800px) {
+  .winners-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  .winner-card-first {
+    grid-column: 1 / -1;
+    width: min(100%, 440px);
+    justify-self: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .winners-grid {
+    grid-template-columns: 1fr;
+    max-width: 380px;
+  }
+
+  .winner-card-first {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  .winner-details {
+    padding: 1.15rem 1rem 1.3rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .winner-card {
+    transition: none;
+  }
+
+  .winner-card:hover {
+    transform: none;
+  }
+}

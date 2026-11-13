@@ -15,6 +15,7 @@ import { Timeline } from "./components/Timeline";
 import Practice from "./components/Practice";
 import Registration from "./components/Registration";
 import Announcement from "./components/Announcement";
+import Winners from "./components/Winners";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
                 <Skills />
                 <About />
                 <Contact />
+                <Winners />
                 <Footer />
               </>
             }
