@@ -4,15 +4,20 @@ import colorSharp2 from "../assets/img/color-sharp2.png";
 import "./Timeline.css";
 
 const timelineData = [
-  { date: "14 November 2026", title: "Aptitude Round", mode: "Online" },
   {
-    date: "19 November 2026",
+    date: "15 November 2026",
+    title: "Aptitude Round",
+    time: "6:00 PM",
+    mode: "Online",
+  },
+  {
+    date: "17 November 2026",
     title: "DSA Round",
     mode: "Offline",
     venue: "IT Department",
   },
   {
-    date: "23 November 2026",
+    date: "19 November 2026",
     title: "DSA Final Round",
     mode: "Offline",
     venue: "IT Department",
@@ -53,6 +58,7 @@ export const Timeline = () => {
                 >
                   <article className="timeline-card">
                     <p className="timeline-date">{round.date}</p>
+                    {round.time && <p className="timeline-card-text">{round.time}</p>}
                     <h3 className="timeline-card-title">{round.title}</h3>
                     <p className="timeline-card-text">{round.mode}</p>
                     {round.venue && (

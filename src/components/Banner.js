@@ -72,9 +72,9 @@ export const Banner = () => {
                     </Link>
                   </div>
                   <p className="hero-dates">
-                    <span>Aptitude · 14 Nov 2026</span>
-                    <span>DSA · 19 Nov 2026</span>
-                    <span>Final · 23 Nov 2026</span>
+                    <span>Aptitude · 15 Nov 2026 · 6:00 PM · Online</span>
+                    <span>DSA · 17 Nov 2026 · Offline</span>
+                    <span>Final · 19 Nov 2026 · Offline</span>
                   </p>
                 </div>
               )}
