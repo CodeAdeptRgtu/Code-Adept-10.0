@@ -1,11 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  collection,
-  doc,
-  runTransaction,
-  serverTimestamp,
-} from "firebase/firestore";
-import { db, isFirebaseConfigured } from "./firebase";
 import "./Registration.css";
 
 const REGISTRATION_OPENS = "2026-11-13";
@@ -26,20 +19,6 @@ const todayInIndia = () =>
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
-
-const hashEnrollmentNumber = async (enrollmentNumber) => {
-  if (!window.crypto?.subtle) {
-    throw new Error("A secure browser connection is required to register.");
-  }
-
-  const bytes = new TextEncoder().encode(enrollmentNumber);
-  const digest = await window.crypto.subtle.digest("SHA-256", bytes);
-  const hexDigest = Array.from(new Uint8Array(digest), (byte) =>
-    byte.toString(16).padStart(2, "0")
-  ).join("");
-
-  return `ca10_${hexDigest}`;
-};
 
 function Registration() {
   const [formData, setFormData] = useState(EMPTY_FORM);
@@ -75,13 +54,6 @@ function Registration() {
       return;
     }
 
-    if (!isFirebaseConfigured) {
-      setError(
-        "Registration is unavailable because Firebase is not configured for this deployment."
-      );
-      return;
-    }
-
     const cleaned = Object.fromEntries(
       Object.entries(formData).map(([key, value]) => [key, value.trim()])
     );
@@ -108,47 +80,35 @@ function Registration() {
     setSuccess("");
 
     try {
-      const normalizedEnrollment = cleaned.enrollmentNumber.toUpperCase();
-      const registrationId = await hashEnrollmentNumber(normalizedEnrollment);
-      const registrationKeyRef = doc(db, "registrationKeys", registrationId);
-      const registrationRef = doc(collection(db, "registrations"));
-
-      await runTransaction(db, async (transaction) => {
-        const existingRegistration = await transaction.get(registrationKeyRef);
-
-        if (existingRegistration.exists()) {
-          const duplicateError = new Error("This enrollment number is registered already.");
-          duplicateError.code = "registration/already-exists";
-          throw duplicateError;
-        }
-
-        transaction.set(registrationKeyRef, {
-          event: "CodeAdept 10.0",
-          registeredAt: serverTimestamp(),
-        });
-        transaction.set(registrationRef, {
-          ...cleaned,
-          enrollmentNumber: normalizedEnrollment,
-          emailAddress: cleaned.emailAddress.toLowerCase(),
-          currentSemester: Number(cleaned.currentSemester),
-          event: "CodeAdept 10.0",
-          registrationFee: "FREE",
-          participation: "Individual",
-          registeredAt: serverTimestamp(),
-        });
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(cleaned),
       });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const submissionError = new Error(result.message || "Registration failed.");
+        submissionError.code = result.code;
+        submissionError.status = response.status;
+        throw submissionError;
+      }
 
       setFormData(EMPTY_FORM);
       setSuccess("Registration confirmed. Your details were saved successfully.");
     } catch (submissionError) {
       if (submissionError.code === "registration/already-exists") {
         setError("This enrollment number is already registered.");
-      } else if (submissionError.code === "permission-denied") {
+      } else if (submissionError.code === "registration/not-open") {
+        setError("Registration opens on 13 November 2026.");
+      } else if (submissionError.status === 503) {
         setError(
-          "Firebase denied this registration. Please contact the event organisers."
+          "Registration is unavailable because Firebase is not configured for this deployment."
         );
-      } else if (submissionError.code === "unavailable") {
+      } else if (submissionError.status >= 500 || submissionError instanceof TypeError) {
         setError("Registration could not reach Firebase. Check your connection and try again.");
+      } else if (submissionError.code === "registration/invalid-input") {
+        setError(submissionError.message || "Please check the registration details and try again.");
       } else {
         setError(
           "We could not confirm your registration. Please try again or contact the event organisers."
@@ -204,13 +164,6 @@ function Registration() {
           <span>Organised by the Department of Information Technology, UIT RGPV</span>
         </div>
 
-        {!isFirebaseConfigured && (
-          <p className="registration-alert" role="alert">
-            Firebase is not configured for this deployment. Registration cannot
-            be submitted until the existing Firebase environment is provided.
-          </p>
-        )}
-
         <form className="registration-fields" onSubmit={handleSubmit}>
           {fields.map((field) => (
             <div className="registration-field" key={field.name}>
@@ -249,15 +202,13 @@ function Registration() {
           <button
             className="registration-submit"
             type="submit"
-            disabled={!registrationOpen || !isFirebaseConfigured || isSubmitting}
+            disabled={!registrationOpen || isSubmitting}
           >
             {isSubmitting
               ? "Submitting registration…"
-              : !isFirebaseConfigured
-                ? "Registration unavailable"
-                : registrationOpen
-                  ? "Submit registration"
-                  : "Opens 13 November 2026"}
+              : registrationOpen
+                ? "Submit registration"
+                : "Opens 13 November 2026"}
           </button>
         </form>
       </section>
