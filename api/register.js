@@ -7,7 +7,9 @@ const EVENT_NAME = "CodeAdept 10.0";
 
 function getFirestore() {
   if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
-    throw new Error("Firebase Admin is not configured.");
+    const error = new Error("Required Firebase Admin environment variable is missing.");
+    error.code = "registration/firebase-config-missing";
+    throw error;
   }
 
   if (getApps().length === 0) {
@@ -15,7 +17,9 @@ function getFirestore() {
     try {
       serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     } catch {
-      throw new Error("Firebase Admin configuration is invalid.");
+      const error = new Error("Firebase Admin service account JSON is invalid.");
+      error.code = "registration/firebase-config-invalid";
+      throw error;
     }
 
     if (
@@ -24,7 +28,9 @@ function getFirestore() {
       typeof serviceAccount.client_email !== "string" ||
       typeof serviceAccount.private_key !== "string"
     ) {
-      throw new Error("Firebase Admin configuration is invalid.");
+      const error = new Error("Firebase Admin service account fields are invalid.");
+      error.code = "registration/firebase-config-invalid";
+      throw error;
     }
 
     serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
@@ -32,6 +38,36 @@ function getFirestore() {
   }
 
   return getAdminFirestore();
+}
+
+function safeErrorDetails(error) {
+  const rawCode = typeof error?.code === "string" || typeof error?.code === "number"
+    ? String(error.code).slice(0, 80)
+    : "unknown";
+  const diagnostic = `${rawCode} ${error?.message || ""}`.toLowerCase();
+  let category = "Firebase operation failed; inspect error name and code.";
+
+  if (/permission[-_ ]denied|(^|\D)7(\D|$)/.test(diagnostic)) {
+    category = "Firestore rejected the service account permissions.";
+  } else if (/not[-_ ]found|(^|\D)5(\D|$)/.test(diagnostic)) {
+    category = "Firestore database or requested resource was not found.";
+  } else if (/invalid[-_ ]credential|unauthenticated|(^|\D)16(\D|$)/.test(diagnostic)) {
+    category = "Firebase Admin credentials were rejected.";
+  } else if (/deadline[-_ ]exceeded|timed? ?out|econnreset|etimedout|(^|\D)4(\D|$)/.test(diagnostic)) {
+    category = "Firebase request timed out or the connection was interrupted.";
+  } else if (/unavailable|(^|\D)14(\D|$)/.test(diagnostic)) {
+    category = "Firestore is temporarily unavailable.";
+  } else if (/firebase-config-missing/.test(diagnostic)) {
+    category = "FIREBASE_SERVICE_ACCOUNT is not configured.";
+  } else if (/firebase-config-invalid/.test(diagnostic)) {
+    category = "FIREBASE_SERVICE_ACCOUNT is not valid service account JSON.";
+  }
+
+  return {
+    name: typeof error?.name === "string" ? error.name.slice(0, 80) : "Error",
+    code: rawCode.replace(/[^a-zA-Z0-9_./-]/g, ""),
+    category,
+  };
 }
 
 function todayInIndia() {
@@ -115,6 +151,7 @@ module.exports = async function register(req, res) {
     });
   }
 
+  let operation = "firebase_initialization";
   try {
     const db = getFirestore();
     const { values } = validated;
@@ -123,6 +160,7 @@ module.exports = async function register(req, res) {
     const registrationKeyRef = db.collection("registrationKeys").doc(registrationId);
     const registrationRef = db.collection("registrations").doc();
 
+    operation = "firestore_registration_transaction";
     await db.runTransaction(async (transaction) => {
       const existingRegistration = await transaction.get(registrationKeyRef);
       if (existingRegistration.exists) {
@@ -153,15 +191,21 @@ module.exports = async function register(req, res) {
       });
     }
 
-    if (error.message === "Firebase Admin is not configured.") {
+    console.error("[registration] backend operation failed", {
+      operation,
+      error: safeErrorDetails(error),
+    });
+
+    if (
+      error.code === "registration/firebase-config-missing" ||
+      error.code === "registration/firebase-config-invalid"
+    ) {
       return res.status(503).json({
         code: "firebase/not-configured",
         message: "Registration is unavailable. Please contact the event organisers.",
       });
     }
 
-    // Avoid logging request data or credential-related errors.
-    console.error("Registration submission failed.");
     return res.status(500).json({
       code: "registration/failed",
       message: "We could not confirm your registration. Please try again or contact the event organisers.",
